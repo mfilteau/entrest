@@ -108,6 +108,7 @@ type Annotation struct {
 	Skip            bool        `json:",omitempty" ent:"schema,edge,field"`
 	AllowClientIDs  *bool       `json:",omitempty" ent:"schema"`
 	Operations      []Operation `json:",omitempty" ent:"schema,edge"`
+	RestPrefix      *string     `json:",omitempty" ent:"schema"`
 }
 
 // getSupportedType uses reflection to check if the annotation is supported on the
@@ -243,6 +244,9 @@ func (a Annotation) Merge(o schema.Annotation) schema.Annotation { // nolint:goc
 				a.Operations = append(a.Operations, op)
 			}
 		}
+	}
+	if am.RestPrefix != nil {
+		a.RestPrefix = am.RestPrefix
 	}
 
 	return a
@@ -412,6 +416,13 @@ func (a *Annotation) GetAllowClientIDs(config *Config) bool {
 		return config.AllowClientIDs
 	}
 	return *a.AllowClientIDs
+}
+
+func (a *Annotation) GetRestPrefix() string {
+	if a.RestPrefix == nil {
+		return ""
+	}
+	return *a.RestPrefix
 }
 
 // WithOperationSummary provides a summary for the specified operation. This should be
@@ -637,4 +648,9 @@ func WithExcludeOperations(v ...Operation) Annotation {
 		}
 	}
 	return Annotation{Operations: ops}
+}
+
+// WithRestPrefix sets the REST API prefix for the schema.
+func WithRestPrefix(prefix string) Annotation {
+	return Annotation{RestPrefix: &prefix}
 }

@@ -859,10 +859,12 @@ func GetPathName(op Operation, t *gen.Type, e *gen.Edge, useUniqueID bool) strin
 		id = "{" + CamelCase(Singularize(t.Name)) + "ID}"
 	}
 
+	prefix := GetAnnotation(t).GetRestPrefix()
+
 	if e != nil {
 		switch op {
 		case OperationRead, OperationList:
-			return "/" + Pluralize(KebabCase(t.Name)) + "/" + id + "/" + KebabCase(e.Name)
+			return prefix + "/" + Pluralize(KebabCase(t.Name)) + "/" + id + "/" + KebabCase(e.Name)
 		default:
 			panic(fmt.Sprintf("unsupported operation %q", op))
 		}
@@ -870,9 +872,9 @@ func GetPathName(op Operation, t *gen.Type, e *gen.Edge, useUniqueID bool) strin
 
 	switch op {
 	case OperationRead, OperationUpdate, OperationDelete:
-		return "/" + Pluralize(KebabCase(t.Name)) + "/" + id
+		return prefix + "/" + Pluralize(KebabCase(t.Name)) + "/" + id
 	case OperationCreate, OperationList:
-		return "/" + Pluralize(KebabCase(t.Name))
+		return prefix + "/" + Pluralize(KebabCase(t.Name))
 	default:
 		panic(fmt.Sprintf("unsupported operation %q", op))
 	}
