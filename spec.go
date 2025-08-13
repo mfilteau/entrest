@@ -861,10 +861,19 @@ func GetPathName(op Operation, t *gen.Type, e *gen.Edge, useUniqueID bool) strin
 
 	prefix := GetAnnotation(t).GetRestPrefix()
 
+	typeName := Pluralize(KebabCase(t.Name))
+	if n, ok := GetAnnotation(t).GetRestName(); ok {
+		typeName = n
+	}
+
 	if e != nil {
+		edgeName := Pluralize(KebabCase(e.Name))
+		if n, ok := GetAnnotation(e).GetRestName(); ok {
+			edgeName = n
+		}
 		switch op {
 		case OperationRead, OperationList:
-			return prefix + "/" + Pluralize(KebabCase(t.Name)) + "/" + id + "/" + KebabCase(e.Name)
+			return prefix + "/" + typeName + "/" + id + "/" + edgeName
 		default:
 			panic(fmt.Sprintf("unsupported operation %q", op))
 		}
@@ -872,9 +881,9 @@ func GetPathName(op Operation, t *gen.Type, e *gen.Edge, useUniqueID bool) strin
 
 	switch op {
 	case OperationRead, OperationUpdate, OperationDelete:
-		return prefix + "/" + Pluralize(KebabCase(t.Name)) + "/" + id
+		return prefix + "/" + typeName + "/" + id
 	case OperationCreate, OperationList:
-		return prefix + "/" + Pluralize(KebabCase(t.Name))
+		return prefix + "/" + typeName
 	default:
 		panic(fmt.Sprintf("unsupported operation %q", op))
 	}
