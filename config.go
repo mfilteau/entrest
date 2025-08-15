@@ -182,6 +182,9 @@ type Config struct {
 
 	// Templates a universal template that can be used to add or replace an existing template.
 	Templates []*gen.Template `json:"-"`
+
+	// EnableUUIDQueryParam enables support for UUID as query parameters. When true, a UUID parser will be registered in the default form decoder.
+	EnableUUIDQueryParam bool
 }
 
 func (c *Config) Validate() error {

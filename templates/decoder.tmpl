@@ -1,0 +1,73 @@
+{{- /*
+  Copyright (c) Liam Stanley <liam@liam.sh>. All rights reserved. Use of
+  this source code is governed by the MIT license that can be found in
+  the LICENSE file.
+*/ -}}
+{{- define "rest/decoder" }}
+{{- with extend $ "Package" "rest" }}{{ template "header" . }}{{ end }}
+
+import (
+    "strings"
+
+    "github.com/go-playground/form/v4"
+    uuid "github.com/google/uuid"
+    {{- template "helper/rest/standard-imports" . }}
+)
+
+// init configures the default form decoder to parse UUID values from query params.
+// This allows filters like userID.eq=<uuid> to bind into *uuid.UUID fields.
+func init() {
+    // Optionally use snake_case for query parameters if enabled in config.
+    {{- if (getConfig $.Config).UseSnakeCaseQueryParams }}
+    DefaultDecoder.SetNameMapper(func(fieldName string) string {
+        var out []rune
+        for i, r := range fieldName {
+            if i > 0 && r >= 'A' && r <= 'Z' {
+                out = append(out, '_')
+            }
+            out = append(out, r)
+        }
+        return strings.ToLower(string(out))
+    })
+    {{- end }}
+    // Ensure the decoder exists (defensive in case code is reused differently).
+    if DefaultDecoder == nil {
+        DefaultDecoder = form.NewDecoder()
+    }
+
+    {{- if (getConfig $.Config).EnableUUIDQueryParam }}
+    // Register for value type uuid.UUID.
+    DefaultDecoder.RegisterCustomTypeFunc(func(vals []string) (any, error) {
+        if len(vals) == 0 {
+            return uuid.UUID{}, nil
+        }
+        s := strings.TrimSpace(vals[0])
+        if s == "" {
+            // Return zero value when empty string is provided.
+            return uuid.UUID{}, nil
+        }
+        u, err := uuid.Parse(s)
+        if err != nil {
+            return uuid.UUID{}, err
+        }
+        return u, nil
+    }, uuid.UUID{})
+
+    // Register for pointer type *uuid.UUID to support optional filters.
+    DefaultDecoder.RegisterCustomTypeFunc(func(vals []string) (any, error) {
+        if len(vals) == 0 {
+            return (*uuid.UUID)(nil), nil
+        }
+        s := strings.TrimSpace(vals[0])
+        if s == "" {
+            return (*uuid.UUID)(nil), nil
+        }
+        u, err := uuid.Parse(s)
+        if err != nil {
+            return (*uuid.UUID)(nil), err
+        }
+        return &u, nil
+    }, (*uuid.UUID)(nil))
+    {{- end }}
+}
+{{ end }}{{/* end template */}}

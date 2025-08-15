@@ -28,6 +28,7 @@ var (
 		"getFilterGroups":     GetFilterGroups,
 		"getOperationIDName":  GetOperationIDName,
 		"getPathName":         GetPathName,
+		"getConfig":           GetConfig,
 	}
 
 	//go:embed templates
