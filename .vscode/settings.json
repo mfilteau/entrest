@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "**/*.gotmpl": "go-template",
+        "**/*.tmpl": "go-template"
     },
     "files.exclude": {
         "**/*.example": true,
