@@ -17,19 +17,6 @@ import (
 // init configures the default form decoder to parse UUID values from query params.
 // This allows filters like userID.eq=<uuid> to bind into *uuid.UUID fields.
 func init() {
-    // Optionally use snake_case for query parameters if enabled in config.
-    {{- if (getConfig $.Config).UseSnakeCaseQueryParams }}
-    DefaultDecoder.SetNameMapper(func(fieldName string) string {
-        var out []rune
-        for i, r := range fieldName {
-            if i > 0 && r >= 'A' && r <= 'Z' {
-                out = append(out, '_')
-            }
-            out = append(out, r)
-        }
-        return strings.ToLower(string(out))
-    })
-    {{- end }}
     // Ensure the decoder exists (defensive in case code is reused differently).
     if DefaultDecoder == nil {
         DefaultDecoder = form.NewDecoder()
